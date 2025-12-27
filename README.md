@@ -1,111 +1,233 @@
-# 🚲 CustomBikes
+Aquí tienes un **README.md nuevo**, con el mismo estilo “MVP / End-to-End / DevOps-ready” del ejemplo, pero adaptado a tu repo **Bike-SQL-Python** (Terraform + Postgres de negocio + Airflow). Puedes copiarlo tal cual y reemplazar tu README actual.
 
-Este repositorio contiene el proyecto de base de datos y software desarrollado para CustomBikes S.A., una empresa especializada en la manufactura de bicicletas personalizadas. El objetivo principal es proporcionar una solución que integre una base de datos relacional con un software que gestione eficientemente los pedidos, ensamblajes y estadísticas de la empresa.
+> Nota: dejé los valores `admin/admin` y `custom_user/secure_password` como **demo local** (coherente con tu configuración). Si luego quieres “modo pro”, lo pasamos a `.env.example`.
 
-## ✨ Características del Proyecto
+---
 
-### 🗄️ Base de Datos
-- **Modelado:** Utilizando el enfoque entidad-relación (E-R) y normalización hasta la 3FN.
-- **Scripts:**
-  - Creación de tablas con claves primarias, foráneas y restricciones.
-  - Inserción de al menos 100 registros en cada tabla.
-  - Consultas SQL optimizadas para los requerimientos del sistema.
-  - Procedimientos almacenados para análisis y generación de gráficos.
+````md
+# 🚲 Bike SQL Python - MVP (CustomBikes Data Ops)
 
-### 💻 Software en Python
-- **Conexión con PostgreSQL:** Usando `psycopg2`.
-- **Interfaz gráfica de usuario (GUI):** Desarrollada con `Tkinter`.
-- **Funcionalidades principales:**
-  - Consultar pedidos por cliente y período.
-  - Listar componentes más solicitados.
-  - Mostrar bicicletas vendidas y detalles de sus garantías.
-  - Identificar técnicos destacados y con incrementos de productividad.
-  - Generar gráficos interactivos con `matplotlib`.
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)
+![Postgres](https://img.shields.io/badge/PostgreSQL-13-336791?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue?style=for-the-badge&logo=docker&logoColor=white)
+![Airflow](https://img.shields.io/badge/Apache%20Airflow-2.8.1-017CEE?style=for-the-badge&logo=apacheairflow&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-844FBA?style=for-the-badge&logo=terraform&logoColor=white)
 
-## 📋 Requisitos del Sistema
+> **Estado:** 🟢 Operativo (MVP) | **Rama:** `main`
 
-### 🛠️ Tecnologías Utilizadas
-- Lenguaje: Python 3.8+
-- Base de datos: PostgreSQL
-- Librerías:
-  - `tkinter`
-  - `matplotlib`
-  - `psycopg2`
-  - `tabulate`
-  - `pandas`
+Proyecto **End-to-End** que integra **Infraestructura como Código (Terraform)** + **Base de Datos PostgreSQL** + **Orquestación con Apache Airflow** para generar reportes automatizados desde una base de datos de negocio (*CustomBikes*).
 
-### 🌟 Instalación de Dependencias
+Este repositorio levanta:
+- una **DB de negocio** (Postgres) provisionada vía **Terraform (Docker provider)** con scripts SQL de inicialización,
+- un stack de **Airflow (webserver/scheduler/triggerer)** en Docker Compose,
+- un **DAG** que verifica conectividad y genera un reporte en `./reports/`.
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+El flujo se divide en dos capas:
+
+### 1) Infra (Terraform)
+- Provisiona **PostgreSQL de negocio** como contenedor Docker.
+- Monta scripts SQL (`./sql`) para crear tablas y poblar datos.
+- Expone el puerto **5432**.
+
+### 2) Orquestación (Airflow + Docker Compose)
+- Levanta **Postgres de metadatos de Airflow** (interno, separado de la DB de negocio).
+- Levanta Airflow y ejecuta un DAG que:
+  1) valida conectividad a la DB de negocio,
+  2) ejecuta lógica Python y exporta un CSV a `./reports`.
+
+---
+
+## 🛠️ Stack Tecnológico
+
+- **Infraestructura:** Terraform + Docker Provider (IaC)
+- **Orquestación:** Apache Airflow 2.8.1 (LocalExecutor)
+- **Base de datos:** PostgreSQL 13
+- **Data/ETL:** Python (`pandas`, `sqlalchemy`, `psycopg2-binary`)
+- **Contenerización:** Docker Engine + Docker Compose v2
+
+---
+
+## ✅ Pre-requisitos
+
+- Docker Engine + Docker Compose (v2)
+- Terraform (v1.x)
+- Git
+- (Opcional) Python 3.8+ si ejecutas utilidades localmente
+
+---
+
+## 🚀 Instalación y Ejecución
+
+### 1) Clonar el repositorio
 ```bash
-pip install -r requirements.txt
-```
+git clone https://github.com/diadasiachilensis/Bike-SQL-Python.git
+cd Bike-SQL-Python
+````
 
-## 🚀 Cómo Ejecutar el Proyecto
+---
 
-### Clona este repositorio:
+## 🧱 Paso A — Levantar DB de negocio con Terraform
+
+> Esto crea el contenedor `custombikes_db_container` y la red `custombikes_data_network`.
+
 ```bash
-git clone https://github.com/tu_usuario/CustomBikes.git
-cd CustomBikes
+cd infra
+terraform init
+terraform apply -auto-approve
 ```
 
-### Configura la Base de Datos:
-- Ejecuta el script `database/custombikes.sql` en tu servidor PostgreSQL.
-- Actualiza las credenciales de la base de datos en `main.py`:
-  ```python
-  db = Database(
-      user="tu_usuario",
-      password="tu_contraseña",
-      host="localhost",
-      port="5432",
-      database="custombike"
-  )
-  ```
+### Verificación rápida
 
-### Ejecuta la Aplicación:
 ```bash
-python main.py
+docker ps | grep custombikes_db_container
+docker network ls | grep custombikes_data_network
 ```
 
-## 🖥️ Funcionalidades
+### Ver tablas creadas (opcional)
 
-### 1️⃣ Consultar Pedidos por Cliente
-Permite ingresar el nombre y apellido de un cliente para obtener los pedidos realizados en un período específico.
-
-### 2️⃣ Listar Componentes Más Solicitados
-Muestra los componentes más solicitados en los pedidos ordenados por popularidad.
-
-### 3️⃣ Bicicletas y Garantías
-Lista las bicicletas vendidas junto con los detalles de sus garantías.
-
-### 4️⃣ Técnicos Destacados
-Muestra los técnicos que ensamblaron más bicicletas que el promedio mensual del último año.
-
-### 5️⃣ Técnicos con Incremento
-Identifica técnicos que aumentaron la cantidad de ensamblajes entre dos años específicos.
-
-### 6️⃣ Gráfico "Clientes Bike"
-Genera un gráfico de barras horizontal que muestra el número de clientes que compraron marcos, ruedas y frenos en un año especificado.
-
-## 📖 Estructura del Proyecto
-```
-CustomBikes/
-├── database/
-│   └── custombikes.sql   # Script de creación y población de la base de datos
-├── main.py               # Archivo principal para ejecutar la aplicación
-├── gui.py                # Código para la interfaz gráfica
-├── database.py           # Clase para la conexión y operaciones en la base de datos
-├── queries.py            # Módulo con las consultas SQL utilizadas
-├── requirements.txt      # Dependencias necesarias para el proyecto
-└── venv/                 # Entorno virtual para gestionar las librerías
+```bash
+docker exec -it custombikes_db_container psql -U custom_user -d custombike -c "\dt"
 ```
 
-## 👥 Contribuciones
-¿Te gustaría colaborar en este proyecto?
+---
 
-- Reporta errores o problemas abriendo un _issue_ en el repositorio.
-- Propón mejoras en la interfaz o lógica del programa.
-- Realiza un fork del repositorio y envía tus pull requests.
+## 🌬️ Paso B — Levantar Airflow con Docker Compose
 
-## 📝 Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+Vuelve a la raíz del repo:
 
-¡Gracias por revisar este proyecto! 🚴✨
+```bash
+cd ..
+```
+
+Crea el `.env` para permisos consistentes (recomendado):
+
+```bash
+echo "AIRFLOW_UID=50000" > .env
+mkdir -p logs reports plugins
+```
+
+Inicializa Airflow (DB metadatos + usuario admin):
+
+```bash
+docker compose up airflow-init
+```
+
+Levanta todos los servicios:
+
+```bash
+docker compose up -d
+docker compose ps
+```
+
+---
+
+## 🖥️ Acceso a los Servicios
+
+| Servicio              | URL Local               | Credenciales    | Descripción                                |
+| --------------------- | ----------------------- | --------------- | ------------------------------------------ |
+| **Airflow Webserver** | `http://localhost:8080` | `admin / admin` | UI para DAGs, logs, ejecuciones y métricas |
+
+---
+
+## 🧪 Ejecutar el Pipeline (DAG)
+
+1. Entra a Airflow: `http://localhost:8080`
+2. Busca el DAG: **`custombikes_reporte_automatizado`**
+3. Actívalo (**Unpause**)
+4. Ejecuta (**Trigger DAG**)
+
+### Salida esperada
+
+* Un archivo CSV generado en `./reports/` (host)
+* Logs disponibles en la UI de Airflow por task
+
+Verifica en tu máquina:
+
+```bash
+ls -l reports
+```
+
+---
+
+## 📂 Estructura del Proyecto
+
+```text
+Bike-SQL-Python/
+├── infra/
+│   ├── main.tf                 # Terraform: red, imagen y contenedor Postgres (negocio)
+│   └── variables.tf            # Variables Terraform
+├── sql/
+│   ├── 00_init_db.sql
+│   ├── 01_personas.sql
+│   └── ...                     # Scripts SQL (DDL/DML)
+├── dags/
+│   └── reportes_bike_dag.py    # DAG Airflow (verificación + reporte)
+├── scripts/
+│   └── etl_utils.py            # Utilidades Python (query + export)
+├── docker-compose.yml          # Stack Airflow + Postgres metadatos
+├── requirements.txt            # Dependencias Python (útil para ejecución local)
+├── logs/                       # Logs (se ignoran, se conserva .gitkeep)
+├── reports/                    # Outputs (se ignoran, se conserva .gitkeep)
+└── README.md
+```
+
+---
+
+## 🧹 Operación y Mantenimiento
+
+**Ver logs:**
+
+```bash
+docker compose logs -f airflow-scheduler
+docker compose logs -f airflow-webserver
+```
+
+**Detener stack Airflow:**
+
+```bash
+docker compose down
+```
+
+**Reset total Airflow (incluye volumen metadatos):**
+
+```bash
+docker compose down -v
+```
+
+**Destruir DB de negocio (Terraform):**
+
+```bash
+cd infra
+terraform destroy -auto-approve
+```
+
+---
+
+## 🔮 Roadmap
+
+* [x] DB de negocio provisionada con Terraform (Docker provider)
+* [x] Airflow contenerizado con Postgres de metadatos separado
+* [x] DAG funcional que genera reportes a `./reports`
+* [ ] Parametrización por `.env.example` (credenciales/hosts)
+* [ ] Reportes versionados por fecha y partición
+* [ ] Calidad de datos: validaciones y alertas
+* [ ] Exportación a almacenamiento (S3/GCS) + notificación
+
+---
+
+Hecho con 💻 y ☕ en Chile.
+
+```
+
+---
+
+Si quieres, te lo dejo aún más profesional con:
+- **`.env.example`** + reemplazo de credenciales hardcodeadas,
+- sección “Troubleshooting” (Docker socket, permisos, redes externas, etc.),
+- un diagrama simple de arquitectura (ASCII o PNG en `assets/`).
+::contentReference[oaicite:0]{index=0}
+```
