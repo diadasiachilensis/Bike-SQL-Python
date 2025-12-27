@@ -209,6 +209,7 @@ terraform destroy -auto-approve
 * [ ] Reportes versionados por fecha y partición
 * [ ] Calidad de datos: validaciones y alertas
 * [ ] Exportación a almacenamiento (S3/GCS) + notificación
+* [ ] Integración con dbt para transformaciones SQL avanzadas.* (Aunque no lo hagas todavía, mencionar dbt muestra que sabes cuál es el siguiente paso lógico en la industria).
 
 ---
 
