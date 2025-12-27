@@ -1,0 +1,38 @@
+CustomBikes-Modern/
+├── dags/                          # ORQUESTACIÓN (Airflow)
+│   ├── __init__.py
+│   └── reportes_bike_dag.py       # Pipeline: Sensor -> ETL -> Reporte CSV
+│
+├── infra/                         # INFRAESTRUCTURA COMO CÓDIGO (IaC)
+│   ├── main.tf                    # Terraform: Define red y contenedor de DB
+│   └── variables.tf               # Variables de configuración (puertos, usuarios)
+│
+├── scripts/                       # LÓGICA DE NEGOCIO (ETL)
+│   ├── __init__.py
+│   └── etl_utils.py               # Lógica pura (Pandas/SQLAlchemy) extraída de queries.py
+│
+├── sql/                           # DATOS E INICIALIZACIÓN (Secuencial 00-11)
+│   ├── 00_schema_init.sql         # (DDL) Crea las tablas vacías (ex-custombike.sql)
+│   ├── 01_personas.sql            # (DML) Datos semilla: Personas
+│   ├── 02_fechas.sql              # (DML) Datos semilla: Dimensiones de tiempo
+│   ├── 03_componentes.sql         # (DML) Datos semilla: Catálogo
+│   ├── 04_garantias.sql           # (DML) Datos semilla: Reglas
+│   ├── 05_descuentos.sql          # (DML) Datos semilla: Reglas
+│   ├── 06_clientes.sql            # (DML) Roles: Clientes
+│   ├── 07_tecnicos.sql            # (DML) Roles: Técnicos
+│   ├── 08_pedidos.sql             # (DML) Transaccional: Cabecera Pedidos
+│   ├── 09_tecnico_pedidos.sql     # (DML) Transaccional: Asignaciones
+│   ├── 10_pedido_componentes.sql  # (DML) Transaccional: Detalles
+│   └── 11_facturas.sql            # (DML) Transaccional: Cierre financiero
+│
+├── reports/                       # CAPA DE SALIDA (Data Lake Simulado)
+│   └── .gitkeep                   # Aquí aterrizarán los CSV generados por Airflow
+│
+├── logs/                          # OBSERVABILIDAD
+│   └── .gitkeep                   # Logs de ejecución de Airflow
+│
+├── .env.example                   # SEGURIDAD (Credenciales, NO subir .env real)
+├── .gitignore                     # Ignorar venv, .env, .terraform, logs/
+├── docker-compose.yml             # ORQUESTADOR DE SERVICIOS (Airflow + Postgres)
+├── requirements.txt               # Dependencias: apache-airflow, pandas, psycopg2
+└── README.md                      # Documentación de la nueva arquitectura
