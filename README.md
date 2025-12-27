@@ -1,10 +1,3 @@
-Aquí tienes un **README.md nuevo**, con el mismo estilo “MVP / End-to-End / DevOps-ready” del ejemplo, pero adaptado a tu repo **Bike-SQL-Python** (Terraform + Postgres de negocio + Airflow). Puedes copiarlo tal cual y reemplazar tu README actual.
-
-> Nota: dejé los valores `admin/admin` y `custom_user/secure_password` como **demo local** (coherente con tu configuración). Si luego quieres “modo pro”, lo pasamos a `.env.example`.
-
----
-
-````md
 # 🚲 Bike SQL Python - MVP (CustomBikes Data Ops)
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=for-the-badge&logo=python&logoColor=white)
@@ -221,13 +214,3 @@ terraform destroy -auto-approve
 
 Hecho con 💻 y ☕ en Chile.
 
-```
-
----
-
-Si quieres, te lo dejo aún más profesional con:
-- **`.env.example`** + reemplazo de credenciales hardcodeadas,
-- sección “Troubleshooting” (Docker socket, permisos, redes externas, etc.),
-- un diagrama simple de arquitectura (ASCII o PNG en `assets/`).
-::contentReference[oaicite:0]{index=0}
-```
